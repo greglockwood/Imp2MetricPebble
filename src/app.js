@@ -98,7 +98,7 @@ function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, conv
     }
     menu.uiMenu = new UI.Menu({
         sections: [{
-            title: sectionTitle + ' (' + min + '-' + max + ')',
+            title: sectionTitle,
             items: menu.items
         }]
     });
