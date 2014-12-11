@@ -17,7 +17,7 @@ var menus = [{
             },
             min: 0,
             max: 500,
-            steps: [50, 10, 5, 1]
+            steps: [50, 10, 1]
         },
         to: {
             text: 'Kilometres',
