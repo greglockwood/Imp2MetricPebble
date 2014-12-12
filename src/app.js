@@ -50,6 +50,27 @@ var menus = [{
             max: 500,
             steps: [50, 10, 1]
         }
+    }, {
+        from: {
+            text: 'Fahrenheit',
+            abbr: 'F',
+            convert: function (f) {
+                return (5 / 9) * (f - 32);
+            },
+            min: -200,
+            max: 700,
+            steps: [100, 25, 5, 1]
+        },
+        to: {
+            text: 'Celsius',
+            abbr: 'C',
+            convert: function (c) {
+                return (9 / 5) * (c + 32);
+            },
+            min: -50,
+            max: 450,
+            steps: [50, 10, 1]
+        }
     }]
 }];
 
@@ -89,24 +110,31 @@ function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, conv
     for (var x = min; x < max; x += step) {
         if (x !== 0 || step !== 1) {
             var menuItem = {
-                title: (step > 1 ? fmt(x) + ' - ' : '') + fmt(x + step - 1, abbr.from),
-                subtitle: (step > 1 ? fmt(convert(x)) + ' - ' : '') + fmt(convert(x + step - 1), abbr.to)
+                title: (step > 1 ? fmt(x) + ' to ' : '') + fmt(x + step - 1, abbr.from),
+                subtitle: (step > 1 ? fmt(convert(x)) + ' to ' : '') + fmt(convert(x + step - 1), abbr.to)
             };
             if (!_.isEmpty(steps)) buildMenuItemsAndUIMenu(menuItem, sectionTitle, x, x + step, steps, abbr, convert);
             menu.items.push(menuItem);
         }
     }
-    menu.uiMenu = new UI.Menu({
-        sections: [{
-            title: sectionTitle,
-            items: menu.items
-        }]
-    });
-    menu.uiMenu.on('select', function (e) {
-        if (menu.items[e.itemIndex].uiMenu) {
-            menu.items[e.itemIndex].uiMenu.show();
+    menu.hasMenu = true;
+    menu.showMenu = function () {
+        // lazily instantiate it the first time it is accessed
+        if (!this.uiMenu) {
+            this.uiMenu = new UI.Menu({
+                sections: [{
+                    title: sectionTitle,
+                    items: menu.items
+                }]
+            });
+            this.uiMenu.on('select', function (e) {
+                if (menu.items[e.itemIndex].hasMenu) {
+                    menu.items[e.itemIndex].showMenu();
+                }
+            });
         }
-    });
+        this.uiMenu.show();
+    };
 }
 _.each(menus[0].units, function (unit) {
     buildMenuItemsAndUIMenu(unit.from,
@@ -150,6 +178,6 @@ var menu = new UI.Menu({
 });
 menu.on('select', function (e) {
     var direction = e.sectionIndex === 0 ? 'from' : 'to';
-    menus[0].units[e.itemIndex][direction].uiMenu.show();
+    menus[0].units[e.itemIndex][direction].showMenu();
 });
 menu.show();
