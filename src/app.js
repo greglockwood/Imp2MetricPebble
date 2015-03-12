@@ -65,11 +65,32 @@ var menus = [{
             text: 'Celsius',
             abbr: 'C',
             convert: function (c) {
-                return (9 / 5) * (c + 32);
+                return (9 / 5) * c + 32;
             },
             min: -50,
             max: 450,
             steps: [50, 10, 1]
+        }
+    }, {
+        from: {
+            text: 'Calories',
+            abbr: 'Cal',
+            convert: function (c) {
+                return c * 4.184;
+            },
+            min: 0,
+            max: 4000,
+            steps: [500, 100, 10, 1]
+        },
+        to: {
+            text: 'Kilojoules',
+            abbr: 'kJ',
+            convert: function (kj) {
+                return kj * 0.239;
+            },
+            min: 0,
+            max: 15000,
+            steps: [1000, 100, 10, 1]
         }
     }]
 }];
@@ -90,11 +111,17 @@ var _ = {
         }
         return newArr;
     },
+    pluck: function (arr, prop) {
+        return _.map(arr, function (i) { return i[prop]; });
+    },
     copyArray: function (arr) {
         return [].concat(arr);
     },
     isEmpty: function (coll) {
         return _.has(coll, 'length') && coll.length === 0;
+    },
+    indexOf: function (coll, item) {
+        return binaryIndexOf.call(coll, item);
     }
 };
 
@@ -103,7 +130,89 @@ function fmt(num, units) {
     return '' + num.toFixed(2) + (units ? ' ' + units : '');
 }
 
-function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, convert) {
+/**
+ * Performs a binary search on the host array. This method can either be
+ * injected into Array.prototype or called with a specified scope like this:
+ * binaryIndexOf.call(someArray, searchElement);
+ *
+ * @param {*} searchElement The item to search for within the array.
+ * @return {Number} The index of the element which defaults to -1 when not found.
+ */
+function binaryIndexOf(searchElement) {
+    'use strict';
+ 
+    var minIndex = 0;
+    var maxIndex = this.length - 1;
+    var currentIndex;
+    var currentElement;
+ 
+    while (minIndex < maxIndex) {
+        currentIndex = (minIndex + maxIndex) >>> 1;
+        currentElement = this[currentIndex];
+ 
+        if (currentElement < searchElement) {
+            minIndex = currentIndex + 1;
+        }
+        else {
+            maxIndex = currentIndex;
+        }
+    }
+ 
+    return maxIndex;
+}
+
+function buildMenuItemsAndUIMenuForBothDirections(unit) {
+    console.log('unit = ', JSON.stringify(unit));
+    _.each(['from', 'to'], function (dir) {
+        var oppDir = dir === 'from' ? 'to' : dir;
+        console.log('unit[', dir, '] = ', JSON.stringify(unit[dir]));
+        var menu = unit[dir],
+            sectionTitle = unit[dir].text + ' to ' + unit[oppDir].text,
+            min = unit[dir].min,
+            max = unit[dir].max,
+            steps = unit[dir].steps,
+            abbr = {
+                from: unit[dir].abbr,
+                to: unit[oppDir].abbr
+            }, 
+            convert = unit[dir].convert;
+        buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, convert, unit[oppDir]);
+    });
+    _.each(['from', 'to'], function (dir) {
+        var oppDir = dir === 'from' ? 'to' : dir;
+        populateCorrespondingIndexes(unit, dir, unit[oppDir].items);
+    });
+}
+
+function populateCorrespondingIndexes(unit, dir, correspondingItems, specificItem) {
+    var otherMins = _.pluck(correspondingItems, 'min');
+    if (_.isEmpty(correspondingItems)) {
+        return;
+    }
+    var itemsColl = unit[dir].items;
+    if (specificItem) {
+        itemsColl = [specificItem];
+    }
+    _.each(itemsColl, function (item) {
+        var min = item.min;
+        var index = binaryIndexOf.call(otherMins, min);
+        if (otherMins[index] > min) {
+            index--;
+            if (min > otherMins[index]) { // && min < (otherMins[index+1] || 0)) {
+                populateCorrespondingIndexes(unit, dir, correspondingItems[index].items || [], item);
+            }
+        }
+        if (!item.correspondingIndexes) {
+            item.correspondingIndexes = [index];
+        } else {
+            item.correspondingIndexes.push(index);
+            item.correspondingIndexes.sort();
+        }
+        console.log('item[' + dir + '].min = ' + min + ', corresponding index = ' + index + ' in ' + JSON.stringify(otherMins) + ', corresponding indexes = ' + JSON.stringify(item.correspondingIndexes));
+    }); 
+}
+
+function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, convert, oppMenu) {
     steps = _.copyArray(steps);
     menu.items = [];
     var step = steps.shift();
@@ -111,9 +220,10 @@ function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, conv
         if (x !== 0 || step !== 1) {
             var menuItem = {
                 title: (step > 1 ? fmt(x) + ' to ' : '') + fmt(x + step - 1, abbr.from),
-                subtitle: (step > 1 ? fmt(convert(x)) + ' to ' : '') + fmt(convert(x + step - 1), abbr.to)
+                subtitle: (step > 1 ? fmt(convert(x)) + ' to ' : '') + fmt(convert(x + step - 1), abbr.to),
+                min: x
             };
-            if (!_.isEmpty(steps)) buildMenuItemsAndUIMenu(menuItem, sectionTitle, x, x + step, steps, abbr, convert);
+            if (!_.isEmpty(steps)) buildMenuItemsAndUIMenu(menuItem, sectionTitle, x, x + step, steps, abbr, convert, oppMenu);
             menu.items.push(menuItem);
         }
     }
@@ -132,30 +242,22 @@ function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, conv
                     menu.items[e.itemIndex].showMenu();
                 }
             });
+            this.uiMenu.on('longSelect', function (e) {
+                var correspondingIndexes = _.copyArray(e.menuItem.correspondingIndexes || []);
+                var correspondingMenuItem = oppMenu;
+                while (_.size(correspondingIndexes) > 0) {
+                    correspondingMenuItem = correspondingMenuItem.items[correspondingIndexes.shift()];
+                }
+                if (correspondingMenuItem) {
+                    correspondingMenuItem.showMenu();
+                }
+            });
         }
         this.uiMenu.show();
     };
 }
-_.each(menus[0].units, function (unit) {
-    buildMenuItemsAndUIMenu(unit.from,
-    unit.from.text + ' to ' + unit.to.text,
-    unit.from.min,
-    unit.from.max,
-    unit.from.steps, {
-        from: unit.from.abbr,
-        to: unit.to.abbr
-    },
-    unit.from.convert);
-    buildMenuItemsAndUIMenu(unit.to,
-    unit.to.text + ' to ' + unit.from.text,
-    unit.to.min,
-    unit.to.max,
-    unit.to.steps, {
-        from: unit.to.abbr,
-        to: unit.from.abbr
-    },
-    unit.to.convert);
-});
+
+_.each(menus[0].units, buildMenuItemsAndUIMenuForBothDirections);
 
 var menu = new UI.Menu({
     sections: [{
@@ -181,3 +283,5 @@ menu.on('select', function (e) {
     menus[0].units[e.itemIndex][direction].showMenu();
 });
 menu.show();
+
+console.log(JSON.stringify(menu));
