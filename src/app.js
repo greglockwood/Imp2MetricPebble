@@ -65,7 +65,7 @@ var menus = [{
             text: 'Celsius',
             abbr: 'C',
             convert: function (c) {
-                return (9 / 5) * (c + 32);
+                return (9 / 5) * c + 32;
             },
             min: -50,
             max: 450,
