@@ -71,6 +71,27 @@ var menus = [{
             max: 450,
             steps: [50, 10, 1]
         }
+    }, {
+        from: {
+            text: 'Calories',
+            abbr: 'Cal',
+            convert: function (c) {
+                return c * 4.184;
+            },
+            min: 0,
+            max: 4000,
+            steps: [500, 100, 10, 1]
+        },
+        to: {
+            text: 'Kilojoules',
+            abbr: 'kJ',
+            convert: function (kj) {
+                return kj * 0.239;
+            },
+            min: 0,
+            max: 15000,
+            steps: [1000, 100, 10, 1]
+        }
     }]
 }];
 
