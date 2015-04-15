@@ -6,8 +6,8 @@
 
 var UI = require('ui'),
     Settings = require('settings'),
-    _ = require('lodash-mini'),
-    data = require('data');
+    _ = require('./lodash-mini'),
+    data = require('./data');
 
 function convertFnFactory(from, to) {
     var d = data.conversion_details[from];
@@ -66,6 +66,8 @@ function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, conv
     };
 }
 
+var menu, inited = false;
+
 function init() {
     var selected_units = Settings.option("chosen_units") || [],
         selected_units_loaded = !_.isEmpty(selected_units);
@@ -104,7 +106,29 @@ function init() {
         Settings.option("chosen_units", selected_units);
     }
 
-    var menu = new UI.Menu({
+    if (!inited) {
+        Settings.config(
+            {url: 'https://raw.githack.com/greglockwood/Imp2MetricPebble/master/src/settings.html'},
+            function (e) {
+                console.log('closed configurable');
+
+                // Show the parsed response
+                console.log(JSON.stringify(e.options));
+
+                // Show the raw response if parsing failed
+                if (e.failed) {
+                    console.log(e.response);
+                } else {
+                    init();
+                }
+            });
+    }
+
+    if (menu) {
+        menu.hide();
+    }
+
+    menu = new UI.Menu({
         sections: menu_sections
     });
     menu.on('select', function (e) {
@@ -112,20 +136,8 @@ function init() {
     });
 
     menu.show();
+
+    inited = true;
 }
 
 init();
-
-Settings.config(
-    {url: 'https://raw.githubusercontent.com/greglockwood/Imp2MetricPebble/master/src/settings.html'},
-    function (e) {
-        console.log('closed configurable');
-
-        // Show the parsed response
-        console.log(JSON.stringify(e.options));
-
-        // Show the raw response if parsing failed
-        if (e.failed) {
-            console.log(e.response);
-        }
-    });

@@ -228,11 +228,22 @@ version: 2.7.0
 <script>
     var data = config_data;
     var chosen_units = data.menu_sections[0].units.concat(data.menu_sections[1].units);
-    if ('Settings' in this) {
-        var existing_value = Settings.option('chosen_units');
-        if (existing_value)
-            chosen_units = existing_value;
-    }
+
+    var setOptions = function() {
+        var options = window.location.hash;
+        if (!options) {
+            return {};
+        }
+        var options = JSON.parse(decodeURIComponent(options.substr(1)));
+        if (!options) {
+            return {};
+        }
+        if (options.chosen_units)
+            chosen_units = options.chosen_units;
+        return options;
+    };
+
+    setOptions();
 
     document.addEventListener('DOMContentLoaded', function () {
         var entries = document.getElementsByClassName('entries')[0];
