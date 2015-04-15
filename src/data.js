@@ -1,4 +1,4 @@
-{
+module.exports = {
     "units": {
         "mi": {
             "text": "Miles",
@@ -103,4 +103,4 @@
             }
         }
     }
-}
+};
