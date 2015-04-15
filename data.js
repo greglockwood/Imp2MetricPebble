@@ -69,8 +69,8 @@ var config_data = {
             "abbr": "in",
             "convertTo": "uknmi",
             "min": 0,
-            "max": 50000000,
-            "steps": [5000000, 500000, 100000, 20000, 5000, 500, 50, 10, 1]
+            "max": 500000,
+            "steps": [50000, 5000, 500, 50, 10, 1]
         },
         "uknmi": {
             "text": "UK Nautical Miles",
