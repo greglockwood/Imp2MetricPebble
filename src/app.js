@@ -27,29 +27,46 @@ function getUnit(id) {
     return data.units[id];
 }
 
-function fmt(num, units) {
-    if (num === Math.floor(num)) return '' + num + (units ? ' ' + units : '');
-    return '' + num.toFixed(2) + (units ? ' ' + units : '');
+function fmt(num, units, dontTruncate) {
+    var suffix = '', truncate = !dontTruncate;
+    if (truncate && num > 1e6) {
+        num /= 1e6;
+        suffix = ' mil';
+    } else if (truncate && num > 1e4) {
+        num /= 1e3;
+        suffix = ' k';
+    }
+    if (num === Math.floor(num)) return '' + num + suffix + (units ? ' ' + units : '');
+    var fixedNum = '' + num.toFixed(2);
+    if (fixedNum.indexOf('.') > 0) {
+        var parts = fixedNum.split('.');
+        fixedNum = parts[0];
+        var decimalPart = parts[1].replace(/0+$/, '');
+        if (decimalPart) {
+            fixedNum += '.' + decimalPart;
+        }
+    }
+    return fixedNum + suffix + (units ? ' ' + units : '');
 }
 
 function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, convert) {
     steps = _.copyArray(steps);
-    menu.items = [];
-    var step = steps.shift();
-    for (var x = min; x < max; x += step) {
-        if (x !== 0 || step !== 1) {
-            var menuItem = {
-                title: (step > 1 ? fmt(x) + ' to ' : '') + fmt(x + step - 1, abbr.from),
-                subtitle: (step > 1 ? fmt(convert(x)) + ' to ' : '') + fmt(convert(x + step - 1), abbr.to)
-            };
-            if (!_.isEmpty(steps)) buildMenuItemsAndUIMenu(menuItem, sectionTitle, x, x + step, steps, abbr, convert);
-            menu.items.push(menuItem);
-        }
-    }
     menu.hasMenu = true;
     menu.showMenu = function () {
 // lazily instantiate it the first time it is accessed
         if (!this.uiMenu) {
+            menu.items = [];
+            var step = steps.shift();
+            for (var x = min; x < max; x += step) {
+                if (x !== 0 || step !== 1) {
+                    var menuItem = {
+                        title: (step > 1 ? fmt(x) + ' to ' : '') + fmt(x + step - 1, abbr.from),
+                        subtitle: (step > 1 ? fmt(convert(x)) + ' to ' : '') + fmt(convert(x + step - 1), abbr.to, step == 1)
+                    };
+                    if (!_.isEmpty(steps)) buildMenuItemsAndUIMenu(menuItem, sectionTitle, x, x + step, steps, abbr, convert);
+                    menu.items.push(menuItem);
+                }
+            }
             this.uiMenu = new UI.Menu({
                 sections: [{
                     title: sectionTitle,
@@ -66,9 +83,10 @@ function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, conv
     };
 }
 
-var menu, inited = false;
+var menu, inited = false, startTime;
 
 function init() {
+    startTime = +new Date();
     var selected_units = Settings.option("chosen_units") || [],
         selected_units_loaded = !_.isEmpty(selected_units);
 
@@ -134,6 +152,8 @@ function init() {
     menu.on('select', function (e) {
         menu_sections[e.sectionIndex].items[e.itemIndex].showMenu();
     });
+
+    console.log('Took ' + (+new Date() - startTime) + 'ms to initialise.');
 
     menu.show();
 
