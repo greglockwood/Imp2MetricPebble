@@ -67,65 +67,65 @@ function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, conv
 }
 
 function init() {
-var selected_units = Settings.option("chosen_units") || [],
-    selected_units_loaded = !_.isEmpty(selected_units);
+    var selected_units = Settings.option("chosen_units") || [],
+        selected_units_loaded = !_.isEmpty(selected_units);
 
-var menu_sections = _.map(data.menu_sections, function (section) {
-    var new_section = { title: section.title, items: [] };
+    var menu_sections = _.map(data.menu_sections, function (section) {
+        var new_section = {title: section.title, items: []};
+        if (!selected_units_loaded) {
+            selected_units = selected_units.concat(section.units);
+        }
+        var visible_units = _.filter(section.units, function (unit_pair) {
+            return selected_units.indexOf(unit_pair) > -1;
+        });
+        new_section.items = _.map(visible_units, function (unit_pair) {
+            var parts = unit_pair.split('_'),
+                unitFrom = getUnit(parts[0]),
+                unitTo = getUnit(parts[1]);
+            var item = {
+                title: unitFrom.text,
+                subtitle: 'to ' + unitTo.text
+            };
+            buildMenuItemsAndUIMenu(item,
+                unitFrom.text + ' to ' + unitTo.text,
+                unitFrom.min,
+                unitFrom.max,
+                unitFrom.steps, {
+                    from: unitFrom.abbr,
+                    to: unitTo.abbr
+                },
+                convertFnFactory(unitFrom.id, unitFrom.convertTo));
+            return item;
+        });
+        return new_section;
+    });
+
     if (!selected_units_loaded) {
-        selected_units = selected_units.concat(section.units);
+        Settings.option("chosen_units", selected_units);
     }
-    var visible_units = _.filter(section.units, function (unit_pair) {
-        return selected_units.indexOf(unit_pair) > -1;
+
+    var menu = new UI.Menu({
+        sections: menu_sections
     });
-    new_section.items = _.map(visible_units, function (unit_pair) {
-        var parts = unit_pair.split('_'),
-            unitFrom = getUnit(parts[0]),
-            unitTo = getUnit(parts[1]);
-        var item = {
-            title: unitFrom.text,
-            subtitle: 'to ' + unitTo.text
-        };
-        buildMenuItemsAndUIMenu(item,
-            unitFrom.text + ' to ' + unitTo.text,
-            unitFrom.min,
-            unitFrom.max,
-            unitFrom.steps, {
-                from: unitFrom.abbr,
-                to: unitTo.abbr
-            },
-            convertFnFactory(unitFrom.id, unitFrom.convertTo));
-        return item;
+    menu.on('select', function (e) {
+        menu_sections[e.sectionIndex].items[e.itemIndex].showMenu();
     });
-    return new_section;
-});
 
-if (!selected_units_loaded) {
-    Settings.option("chosen_units", selected_units);
-}
-
-var menu = new UI.Menu({
-    sections: menu_sections
-});
-menu.on('select', function (e) {
-    menu_sections[e.sectionIndex].items[e.itemIndex].showMenu();
-});
-
-menu.show();
+    menu.show();
 }
 
 init();
 
 Settings.config(
     {url: 'https://raw.githubusercontent.com/greglockwood/Imp2MetricPebble/master/src/settings.html'},
-function (e) {
-    console.log('closed configurable');
+    function (e) {
+        console.log('closed configurable');
 
-    // Show the parsed response
-    console.log(JSON.stringify(e.options));
+        // Show the parsed response
+        console.log(JSON.stringify(e.options));
 
-    // Show the raw response if parsing failed
-    if (e.failed) {
-      console.log(e.response);
-    }
-});
+        // Show the raw response if parsing failed
+        if (e.failed) {
+            console.log(e.response);
+        }
+    });
