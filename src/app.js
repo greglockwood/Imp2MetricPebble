@@ -6,92 +6,145 @@
 
 var UI = require('ui');
 
-var menus = [{
-    sectionTitle: "Imperial to Metric",
-    units: [{
-        from: {
+var config = {
+    "units": {
+        "mi": {
             text: 'Miles',
             abbr: 'mi',
-            convert: function (mi) {
-                return mi * 1.6093472;
-            },
+            convertTo: 'km',
             min: 0,
             max: 500,
             steps: [50, 10, 1]
         },
-        to: {
+        "km": {
             text: 'Kilometres',
             abbr: 'km',
-            convert: function (km) {
-                return km * 0.621;
-            },
-            min: 0,
-            max: 500,
-            steps: [50, 10, 1]
-        }
-    }, {
-        from: {
-            text: 'Pounds',
-            abbr: 'lbs',
-            convert: function (lb) {
-                return lb * 0.45359237;
-            },
+            convertTo: 'mi',
             min: 0,
             max: 500,
             steps: [50, 10, 1]
         },
-        to: {
-            text: 'Kilograms',
-            abbr: 'kg',
-            convert: function (kg) {
-                return kg * 2.20462262;
-            },
+        "lbs": {
+            text: 'Pounds',
+            abbr: 'lbs',
+            convertTo: 'kg',
             min: 0,
             max: 500,
             steps: [50, 10, 1]
-        }
-    }, {
-        from: {
+        },
+        "kg": {
+            text: 'Kilograms',
+            abbr: 'kg',
+            convertTo: "lbs",
+            min: 0,
+            max: 500,
+            steps: [50, 10, 1]
+        },
+        "f": {
             text: 'Fahrenheit',
             abbr: 'F',
-            convert: function (f) {
-                return (5 / 9) * (f - 32);
-            },
+            convertTo: "c",
             min: -200,
             max: 700,
             steps: [100, 25, 5, 1]
         },
-        to: {
+        "c": {
             text: 'Celsius',
             abbr: 'C',
-            convert: function (c) {
-                return (9 / 5) * c + 32;
-            },
+            convertTo: "f",
             min: -50,
             max: 450,
             steps: [50, 10, 1]
-        }
-    }, {
-        from: {
+        },
+        "cal": {
             text: 'Calories',
             abbr: 'Cal',
-            convert: function (c) {
-                return c * 4.184;
-            },
+            convertTo: "kj",
             min: 0,
             max: 4000,
             steps: [500, 100, 10, 1]
         },
-        to: {
+        "kj": {
             text: 'Kilojoules',
             abbr: 'kJ',
-            convert: function (kj) {
-                return kj * 0.239;
-            },
+            convertTo: "cal",
             min: 0,
             max: 15000,
             steps: [1000, 100, 10, 1]
         }
+    },
+    "conversion_details": {
+        "mi": {
+            "km": {
+                "mult": 1.6093472
+            }
+        },
+        "km": {
+            "mi": {
+                "mult": 0.621
+            }
+        },
+        "lbs": {
+            "kg": {
+                "mult": 0.45359237
+            }
+        },
+        "kg": {
+            "lbs": {
+                "mult": 2.20462262
+            }
+        },
+        "f": {
+            "c": {
+                "mult": 0.5555555555555,
+                "add_to_input": -32
+            }
+        },
+        "cal": {
+            "kj": {
+                "mult": 4.184
+            }
+        },
+        "kj": {
+            "cal": {
+                "mult": 0.239
+            }
+        }
+    }
+};
+
+function convertFnFactory(from, to) {
+    var d = config.conversion_details[from];
+    if (d) {
+        d = d[to];
+    }
+    return function (input) {
+        if (!d) return input;
+        return (input + (d.add_to_input || 0)) * (d.mult || 1);
+    };
+}
+
+function getUnit(id) {
+    if (config.units[id]) {
+        config.units[id].id = id;
+    }
+    return config.units[id];
+}
+
+var menus = [{
+    sectionTitle: "Imperial to Metric",
+    units: [{
+        from: getUnit('mi'),
+        to: getUnit('km')
+    }, {
+        from: getUnit('lbs'),
+        to: getUnit('kg')
+    }, {
+        from: getUnit('f'),
+        to: getUnit('c')
+    }, {
+        from: getUnit('cal'),
+        to: getUnit('kj')
     }]
 }];
 
@@ -140,7 +193,7 @@ function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, conv
     }
     menu.hasMenu = true;
     menu.showMenu = function () {
-        // lazily instantiate it the first time it is accessed
+// lazily instantiate it the first time it is accessed
         if (!this.uiMenu) {
             this.uiMenu = new UI.Menu({
                 sections: [{
@@ -159,23 +212,23 @@ function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, conv
 }
 _.each(menus[0].units, function (unit) {
     buildMenuItemsAndUIMenu(unit.from,
-    unit.from.text + ' to ' + unit.to.text,
-    unit.from.min,
-    unit.from.max,
-    unit.from.steps, {
-        from: unit.from.abbr,
-        to: unit.to.abbr
-    },
-    unit.from.convert);
+        unit.from.text + ' to ' + unit.to.text,
+        unit.from.min,
+        unit.from.max,
+        unit.from.steps, {
+            from: unit.from.abbr,
+            to: unit.to.abbr
+        },
+        convertFnFactory(unit.from.id, unit.from.convertTo));
     buildMenuItemsAndUIMenu(unit.to,
-    unit.to.text + ' to ' + unit.from.text,
-    unit.to.min,
-    unit.to.max,
-    unit.to.steps, {
-        from: unit.to.abbr,
-        to: unit.from.abbr
-    },
-    unit.to.convert);
+        unit.to.text + ' to ' + unit.from.text,
+        unit.to.min,
+        unit.to.max,
+        unit.to.steps, {
+            from: unit.to.abbr,
+            to: unit.from.abbr
+        },
+        convertFnFactory(unit.to.id, unit.to.convertTo));
 });
 
 var menu = new UI.Menu({
