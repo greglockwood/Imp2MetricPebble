@@ -7,28 +7,28 @@ module.exports = function(grunt) {
                     ignore: ['h2', 'ul', 'li', '.units', '.units li', 'input', 'input[type="checkbox"]']
                 },
                 files: {
-                    "src/settings.uncss.css": ['src/settings-src.html']
+                    "settings/settings.uncss.css": ['settings/settings-src.html']
                 }
             }
         },
         cssmin: {
             settings: {
                 files: {
-                    "src/settings.min.css": ['src/settings.uncss.css']
+                    "settings/settings.min.css": ['settings/settings.uncss.css']
                 }
             }
         },
         uglify: {
             settings: {
                 files: {
-                    "src/settings.min.js": ["src/data.js", "src/settings.js"]
+                    "settings/settings.min.js": ["src/data.js", "settings/settings.js"]
                 }
             }
         },
         processhtml: {
             settings: {
                 files: {
-                    'src/settings.html': ['src/settings-src.html']
+                    'settings/settings.html': ['settings/settings-src.html']
                 }
             }
         },
@@ -37,15 +37,15 @@ module.exports = function(grunt) {
                 livereload: true
             },
             scripts: {
-                files: ['src/data.js', 'src/settings.js'],
+                files: ['src/data.js', 'settings/settings.js'],
                 tasks: ['uglify', 'processhtml']
             },
             styles: {
-                files: ['src/settings.css'],
+                files: ['settings/settings.css'],
                 tasks: ['uncss', 'cssmin', 'processhtml']
             },
             html: {
-                files: ['src/settings-src.html'],
+                files: ['settings/settings-src.html'],
                 tasks: ['processhtml']
             }
         }

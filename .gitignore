@@ -1,6 +1,4 @@
 # Created by .ignore support plugin (hsz.mobi)
-### Example user template template
-### Example user template
 
 # IntelliJ project files
 .idea
@@ -8,6 +6,6 @@
 node_modules
 
 # Minified files
-src/settings.min.*
-src/settings.uncss.css
+settings/settings.min.*
+settings/settings.uncss.css
 

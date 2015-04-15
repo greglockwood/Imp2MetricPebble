@@ -28,7 +28,7 @@ document.addEventListener('DOMContentLoaded', function () {
         ul.className = "units";
         ul.section = i;
         for (var j = 0, jlen = menu_section.all_units.length; j < jlen; j++) {
-            var unit_pair = menu_section.units[j],
+            var unit_pair = menu_section.all_units[j],
                 parts = unit_pair.split('_'),
                 from = data.units[parts[0]],
                 to = data.units[parts[1]];
@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
             cb.type = "checkbox";
             cb.name = unit_pair;
             if (chosen_units.indexOf(unit_pair) > -1)
-                cb.setAttribute('checked', true);
+                cb.setAttribute('checked', 'checked');
             var label = document.createElement('label');
             label.appendChild(cb);
             label.innerHTML += from.text + ' to ' + to.text;

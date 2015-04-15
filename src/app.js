@@ -108,7 +108,7 @@ function init() {
 
     if (!inited) {
         Settings.config(
-            {url: 'https://raw.githack.com/greglockwood/Imp2MetricPebble/master/src/settings.html'},
+            {url: 'https://raw.githack.com/greglockwood/Imp2MetricPebble/master/settings/settings.html'},
             function (e) {
                 console.log('closed configurable');
 
