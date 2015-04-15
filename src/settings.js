@@ -1,5 +1,5 @@
 var data = config_data;
-var chosen_units = data.menu_sections[0].units.concat(data.menu_sections[1].units);
+var chosen_units = data.menu_sections[0].default_units.concat(data.menu_sections[1].default_units);
 
 var setOptions = function() {
     var options = window.location.hash;
@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var ul = document.createElement('ul');
         ul.className = "units";
         ul.section = i;
-        for (var j = 0, jlen = menu_section.units.length; j < jlen; j++) {
+        for (var j = 0, jlen = menu_section.all_units.length; j < jlen; j++) {
             var unit_pair = menu_section.units[j],
                 parts = unit_pair.split('_'),
                 from = data.units[parts[0]],

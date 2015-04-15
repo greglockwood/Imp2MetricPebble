@@ -75,9 +75,9 @@ function init() {
     var menu_sections = _.map(data.menu_sections, function (section) {
         var new_section = {title: section.title, items: []};
         if (!selected_units_loaded) {
-            selected_units = selected_units.concat(section.units);
+            selected_units = selected_units.concat(section.default_units);
         }
-        var visible_units = _.filter(section.units, function (unit_pair) {
+        var visible_units = _.filter(section.all_units, function (unit_pair) {
             return selected_units.indexOf(unit_pair) > -1;
         });
         new_section.items = _.map(visible_units, function (unit_pair) {

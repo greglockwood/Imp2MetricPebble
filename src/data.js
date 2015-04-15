@@ -64,6 +64,22 @@
                 "min": 0,
                 "max": 15000,
                 "steps": [1000, 100, 10, 1]
+            },
+            "in": {
+                "text": "Inches",
+                "abbr": "in",
+                "convertTo": "uknmi",
+                "min": 0,
+                "max": 50000000,
+                "steps": [5000000, 500000, 100000, 20000, 5000, 500, 50, 10, 1]
+            },
+            "uknmi": {
+                "text": "UK Nautical Miles",
+                "abbr": "UK nmi",
+                "convertTo": "uknmi",
+                "min": 0,
+                "max": 1000,
+                "steps": [100, 10, 1]
             }
         },
         "conversion_details": {
@@ -89,7 +105,7 @@
             },
             "f": {
                 "c": {
-                    "mult": 0.5555555555555,
+                    "mult": (5/9),
                     "add_to_input": -32
                 }
             },
@@ -102,16 +118,28 @@
                 "cal": {
                     "mult": 0.239
                 }
+            },
+            "in": {
+                "uknmi": {
+                    "mult": (1/72960)
+                }
+            },
+            "uknmi": {
+                "in": {
+                    "mult": 72960
+                }
             }
         },
         "menu_sections": [
             {
                 "title": "Imperial to Metric",
-                "units": ["mi_km", "lbs_kg", "f_c", "cal_kj"]
+                "all_units": ["mi_km", "lbs_kg", "f_c", "cal_kj", "in_uknmi"],
+                "default_units": ["mi_km", "lbs_kg", "f_c", "cal_kj"]
             },
             {
                 "title": "Metric to Imperial",
-                "units": ["km_mi", "kg_lbs", "c_f", "kj_cal"]
+                "all_units": ["km_mi", "kg_lbs", "c_f", "kj_cal", "uknmi_in"],
+                "default_units": ["km_mi", "kg_lbs", "c_f", "kj_cal"]
             }
         ]
     };
