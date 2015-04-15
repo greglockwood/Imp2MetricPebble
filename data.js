@@ -142,4 +142,3 @@ var config_data = {
         }
     ]
 };
-module.exports = config_data;

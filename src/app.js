@@ -7,7 +7,7 @@
 var UI = require('ui'),
     Settings = require('settings'),
     _ = require('./lodash-mini'),
-    data = require('./data');
+    data = require('./../data');
 
 function convertFnFactory(from, to) {
     var d = data.conversion_details[from];
