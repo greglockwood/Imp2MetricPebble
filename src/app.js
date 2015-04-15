@@ -5,14 +5,9 @@
  */
 
 var UI = require('ui'),
+    Settings = require('settings'),
     _ = require('lodash-mini'),
     data = require('data');
-
-var splashCard = new UI.Card({
-    title: "Please Wait",
-    body: "Downloading"
-});
-splashCard.show();
 
 function convertFnFactory(from, to) {
     var d = data.conversion_details[from];
@@ -71,67 +66,66 @@ function buildMenuItemsAndUIMenu(menu, sectionTitle, min, max, steps, abbr, conv
     };
 }
 
-var menus = [{
-    sectionTitle: "Imperial to Metric",
-    units: [{
-        from: getUnit('mi'),
-        to: getUnit('km')
-    }, {
-        from: getUnit('lbs'),
-        to: getUnit('kg')
-    }, {
-        from: getUnit('f'),
-        to: getUnit('c')
-    }, {
-        from: getUnit('cal'),
-        to: getUnit('kj')
-    }]
-}];
+function init() {
+var selected_units = Settings.option("chosen_units") || [],
+    selected_units_loaded = !_.isEmpty(selected_units);
 
-_.each(menus[0].units, function (unit) {
-    buildMenuItemsAndUIMenu(unit.from,
-        unit.from.text + ' to ' + unit.to.text,
-        unit.from.min,
-        unit.from.max,
-        unit.from.steps, {
-            from: unit.from.abbr,
-            to: unit.to.abbr
-        },
-        convertFnFactory(unit.from.id, unit.from.convertTo));
-    buildMenuItemsAndUIMenu(unit.to,
-        unit.to.text + ' to ' + unit.from.text,
-        unit.to.min,
-        unit.to.max,
-        unit.to.steps, {
-            from: unit.to.abbr,
-            to: unit.from.abbr
-        },
-        convertFnFactory(unit.to.id, unit.to.convertTo));
+var menu_sections = _.map(data.menu_sections, function (section) {
+    var new_section = { title: section.title, items: [] };
+    if (!selected_units_loaded) {
+        selected_units = selected_units.concat(section.units);
+    }
+    var visible_units = _.filter(section.units, function (unit_pair) {
+        return selected_units.indexOf(unit_pair) > -1;
+    });
+    new_section.items = _.map(visible_units, function (unit_pair) {
+        var parts = unit_pair.split('_'),
+            unitFrom = getUnit(parts[0]),
+            unitTo = getUnit(parts[1]);
+        var item = {
+            title: unitFrom.text,
+            subtitle: 'to ' + unitTo.text
+        };
+        buildMenuItemsAndUIMenu(item,
+            unitFrom.text + ' to ' + unitTo.text,
+            unitFrom.min,
+            unitFrom.max,
+            unitFrom.steps, {
+                from: unitFrom.abbr,
+                to: unitTo.abbr
+            },
+            convertFnFactory(unitFrom.id, unitFrom.convertTo));
+        return item;
+    });
+    return new_section;
 });
+
+if (!selected_units_loaded) {
+    Settings.option("chosen_units", selected_units);
+}
 
 var menu = new UI.Menu({
-    sections: [{
-        title: 'Imperial to Metric',
-        items: _.map(menus[0].units, function (unit) {
-            return {
-                title: unit.from.text,
-                subtitle: 'to ' + unit.to.text
-            };
-        })
-    }, {
-        title: 'Metric to Imperial',
-        items: _.map(menus[0].units, function (unit) {
-            return {
-                title: unit.to.text,
-                subtitle: 'to ' + unit.from.text
-            };
-        })
-    }]
+    sections: menu_sections
 });
 menu.on('select', function (e) {
-    var direction = e.sectionIndex === 0 ? 'from' : 'to';
-    menus[0].units[e.itemIndex][direction].showMenu();
+    menu_sections[e.sectionIndex].items[e.itemIndex].showMenu();
 });
 
 menu.show();
-splashCard.hide();
+}
+
+init();
+
+Settings.config(
+    {url: 'https://raw.githubusercontent.com/greglockwood/Imp2MetricPebble/master/src/settings.html'},
+function (e) {
+    console.log('closed configurable');
+
+    // Show the parsed response
+    console.log(JSON.stringify(e.options));
+
+    // Show the raw response if parsing failed
+    if (e.failed) {
+      console.log(e.response);
+    }
+});

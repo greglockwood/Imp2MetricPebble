@@ -1,4 +1,4 @@
-module.exports = {
+var _ = {
     has: function (obj, prop) {
         return obj.hasOwnProperty(prop);
     },
@@ -14,6 +14,20 @@ module.exports = {
         }
         return newArr;
     },
+    filter: function (array, predicate, context) {
+        var index = -1,
+            length = array.length,
+            resIndex = -1,
+            result = [];
+
+        while (++index < length) {
+            var value = array[index];
+            if (predicate.call(context, value, index, array)) {
+                result[++resIndex] = value;
+            }
+        }
+        return result;
+    },
     copyArray: function (arr) {
         return [].concat(arr);
     },
@@ -21,3 +35,7 @@ module.exports = {
         return _.has(coll, 'length') && coll.length === 0;
     }
 };
+
+if (module) {
+    module.exports = _;
+}

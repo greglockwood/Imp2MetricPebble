@@ -1,4 +1,4 @@
-module.exports = {
+var config_data = {
     "units": {
         "mi": {
             "text": "Miles",
@@ -102,5 +102,19 @@ module.exports = {
                 "mult": 0.239
             }
         }
-    }
+    },
+    "menu_sections": [
+        {
+            "title": "Imperial to Metric",
+            "units": [ "mi_km", "lbs_kg", "f_c", "cal_kj" ]
+        },
+        {
+            "title": "Metric to Imperial",
+            "units": [ "km_mi", "kg_lbs", "c_f", "kj_cal" ]
+        }
+    ]
 };
+
+if (module) {
+    module.exports = config_data;
+}

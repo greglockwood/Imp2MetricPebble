@@ -1,7 +1,7 @@
 {
     "appKeys": {},
     "capabilities": [
-        ""
+        "configurable"
     ],
     "companyName": "greg.lockwood.is@gmail.com",
     "longName": "Imperial to Metric",
