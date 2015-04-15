@@ -4,7 +4,7 @@ module.exports = function(grunt) {
         uncss: {
             settings: {
                 options: {
-                    ignore: ['ul', 'li', '.units', '.units li', 'input', 'input[type="checkbox"]']
+                    ignore: ['h2', 'ul', 'li', '.units', '.units li', 'input', 'input[type="checkbox"]']
                 },
                 files: {
                     "src/settings.uncss.css": ['src/settings-src.html']
@@ -43,6 +43,10 @@ module.exports = function(grunt) {
             styles: {
                 files: ['src/settings.css'],
                 tasks: ['uncss', 'cssmin', 'processhtml']
+            },
+            html: {
+                files: ['src/settings-src.html'],
+                tasks: ['processhtml']
             }
         }
     });
