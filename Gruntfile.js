@@ -1,4 +1,18 @@
-module.exports = function(grunt) {
+module.exports = function (grunt) {
+
+    var doNotModifyHeaderText = grunt.file.read('shared/_do_not_modify_header.txt');
+
+    function copySharedScriptConfig(filename, globalVarToExport) {
+        return {
+            src: 'shared/' + filename,
+            dest: 'src/' + filename,
+            options: {
+                process: function (content) {
+                    return doNotModifyHeaderText + content + grunt.util.linefeed + 'module.exports = ' + globalVarToExport + ';';
+                }
+            }
+        };
+    }
 
     grunt.initConfig({
         uncss: {
@@ -26,7 +40,7 @@ module.exports = function(grunt) {
                     }
                 },
                 files: {
-                    "settings/settings.min.js": ["data.js", "settings/settings.js"]
+                    "settings/settings.min.js": ["shared/data.js", "settings/settings.js"]
                 }
             }
         },
@@ -38,14 +52,12 @@ module.exports = function(grunt) {
             }
         },
         copy: {
-            data: {
-                src: 'data.js',
-                dest: 'src/data.js',
-                options: {
-                    process: function (content) {
-                        return content + grunt.util.linefeed + 'module.exports = config_data;';
-                    }
-                }
+            data: copySharedScriptConfig('data.js', 'config_data'),
+            format: copySharedScriptConfig('format.js', 'format')
+        },
+        "js-test": {
+            default: {
+                options: {}
             }
         },
         watch: {
@@ -53,7 +65,7 @@ module.exports = function(grunt) {
                 livereload: true
             },
             scripts: {
-                files: ['data.js', 'settings/settings.js'],
+                files: ['shared/data.js', 'settings/settings.js'],
                 tasks: ['copy', 'uglify', 'processhtml']
             },
             styles: {
@@ -63,6 +75,10 @@ module.exports = function(grunt) {
             html: {
                 files: ['settings/settings-src.html'],
                 tasks: ['processhtml']
+            },
+            tests: {
+                files: ['<%= watch.scripts.files %>', 'test/*.unittests.js'],
+                tasks: ['copy', 'js-test']
             }
         }
     });
@@ -73,6 +89,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-cssmin');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-js-test');
 
     grunt.registerTask('default', ['copy', 'uncss', 'cssmin', 'uglify', 'processhtml', 'watch']);
 

@@ -1,3 +1,12 @@
+/************************************
+ * Do not modify this file directly *
+ * in CloudPebble or elsewhere.     *
+ * It is generated as part of the   *
+ * default grunt task.              *
+ * If you wish to modify it, modify *
+ * the original file in /shared     *
+ * folder and rerun the grunt task. *
+ ************************************/
 var config_data = {
     "units": {
         "mi": {
@@ -108,6 +117,12 @@ var config_data = {
                 "add_to_input": -32
             }
         },
+        "c": {
+            "f": {
+                "mult": 1.8,
+                "add_to_result": 32
+            }
+        },
         "cal": {
             "kj": {
                 "mult": 4.184
@@ -125,7 +140,7 @@ var config_data = {
         },
         "uknmi": {
             "ft": {
-                "mult": 6080
+                "mult": 2315000/381
             }
         }
     },

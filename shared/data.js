@@ -108,6 +108,12 @@ var config_data = {
                 "add_to_input": -32
             }
         },
+        "c": {
+            "f": {
+                "mult": 1.8,
+                "add_to_result": 32
+            }
+        },
         "cal": {
             "kj": {
                 "mult": 4.184
@@ -125,7 +131,7 @@ var config_data = {
         },
         "uknmi": {
             "ft": {
-                "mult": 6080
+                "mult": 2315000/381
             }
         }
     },

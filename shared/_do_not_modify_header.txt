@@ -1,0 +1,9 @@
+/************************************
+ * Do not modify this file directly *
+ * in CloudPebble or elsewhere.     *
+ * It is generated as part of the   *
+ * default grunt task.              *
+ * If you wish to modify it, modify *
+ * the original file in /shared     *
+ * folder and rerun the grunt task. *
+ ************************************/
