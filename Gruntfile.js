@@ -65,7 +65,7 @@ module.exports = function (grunt) {
                 livereload: true
             },
             scripts: {
-                files: ['shared/data.js', 'settings/settings.js'],
+                files: ['shared/data.js', 'shared/format.js', 'settings/settings.js'],
                 tasks: ['copy', 'uglify', 'processhtml']
             },
             styles: {
@@ -91,6 +91,6 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-js-test');
 
-    grunt.registerTask('default', ['copy', 'uncss', 'cssmin', 'uglify', 'processhtml', 'watch']);
+    grunt.registerTask('default', ['copy', 'uncss', 'cssmin', 'uglify', 'processhtml', 'js-test', 'watch']);
 
 };

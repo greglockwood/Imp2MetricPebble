@@ -27,7 +27,11 @@ describe('format', function () {
             {args: [1010000.451, 'mi', DONT_TRUNCATE], expected: '1010000.45 mi'},
             {args: [1010000.456, 'mi', DONT_TRUNCATE], expected: '1010000.46 mi'},
             {args: [1010000.49999, 'mi', DONT_TRUNCATE], expected: '1010000.5 mi'},
-            {args: [5000000, 'nmi'], expected: '5 mil nmi'}
+            {args: [5000000, 'nmi'], expected: '5 mil nmi'},
+            {args: [500000, 'ft'], expected: '500 k ft'},
+            {args: [500000-1, 'ft'], expected: '500 k ft'},
+            {args: [1000000, 'ft'], expected: '1 mil ft'},
+            {args: [1000000-1, 'ft'], expected: '1 mil ft'}
         ].forEach(function (test) {
                 it('should output "' + test.expected + '" when passed (' + test.args.map(JSON.stringify).join() + ')', function () {
                     chai.assert.equal(fmt.apply(null, test.args), test.expected);
