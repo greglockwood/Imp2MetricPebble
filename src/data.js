@@ -76,14 +76,14 @@ var config_data = {
         "ft": {
             "text": "Feet",
             "abbr": "ft",
-            "convertTo": "uknmi",
+            "convertTo": "nmi",
             "min": 0,
             "max": 5000000,
             "steps": [500000, 50000, 10000, 2000, 500, 50, 10, 1]
         },
-        "uknmi": {
-            "text": "UK Nautical Miles",
-            "abbr": "UK nmi",
+        "nmi": {
+            "text": "Nautical Miles",
+            "abbr": "nmi",
             "convertTo": "ft",
             "min": 0,
             "max": 1000,
@@ -134,11 +134,11 @@ var config_data = {
             }
         },
         "ft": {
-            "uknmi": {
-                "mult": 0.00016447
+            "nmi": {
+                "mult": 0.0001645788337
             }
         },
-        "uknmi": {
+        "nmi": {
             "ft": {
                 "mult": 2315000/381
             }
@@ -147,12 +147,12 @@ var config_data = {
     "menu_sections": [
         {
             "title": "Imperial to Metric",
-            "all_units": ["mi_km", "lbs_kg", "f_c", "cal_kj", "ft_uknmi"],
+            "all_units": ["mi_km", "lbs_kg", "f_c", "cal_kj", "ft_nmi"],
             "default_units": ["mi_km", "lbs_kg", "f_c", "cal_kj"]
         },
         {
             "title": "Metric to Imperial",
-            "all_units": ["km_mi", "kg_lbs", "c_f", "kj_cal", "uknmi_ft"],
+            "all_units": ["km_mi", "kg_lbs", "c_f", "kj_cal", "nmi_ft"],
             "default_units": ["km_mi", "kg_lbs", "c_f", "kj_cal"]
         }
     ]
